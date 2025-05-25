@@ -28,36 +28,42 @@ public class PersonHelper extends SQLiteOpenHelper {
             ")";
         db.execSQL(sql);
 
-        // 初期データの挿入
-        List<Person> initialData = InitialData.getInitialData();
-        for (Person person : initialData) {
-            String insertSql = String.format(
-                "INSERT INTO %s (%s) VALUES ('%s')",
+        insertInitialData(db);
+
+    }
+
+    private void insertInitialData(SQLiteDatabase db) {
+        List<Person> persons = InitialData.getInitialData();
+        for (Person person : persons) {
+            String sql = String.format(
+                "INSERT INTO %s (%s, %s) VALUES (%d, '%s')",
                 getTableName(),
+                PersonColumn.ID.getName(),
                 PersonColumn.NAME.getName(),
+                person.id(),
                 person.name()
             );
-            db.execSQL(insertSql);
+            db.execSQL(sql);
         }
     }
 
     public List<Person> getAll() {
-        // List<Person> persons = new ArrayList<>();
-        // SQLiteDatabase db = this.getReadableDatabase();
-        // Cursor cursor = db.rawQuery("SELECT * FROM " + getTableName() + " order by " + PersonColumn.ID.getName(), null);
-        // if (cursor.moveToFirst()) {
-        //     do {
-        //         Person person = new Person(
-        //             cursor.getInt(0),
-        //             cursor.getString(1)
-        //         );
-        //         persons.add(person);
-        //     } while (cursor.moveToNext());
-        // }
-        // cursor.close();
-        // return persons;
+        List<Person> persons = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + getTableName() + " order by " + PersonColumn.ID.getName(), null);
+        if (cursor.moveToFirst()) {
+            do {
+                Person person = new Person(
+                    cursor.getInt(0),
+                    cursor.getString(1)
+                );
+                persons.add(person);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return persons;
 
-        return InitialData.getInitialData(); // For demonstration, returning initial data directly
+        // return InitialData.getInitialData(); // For demonstration, returning initial data directly
     }
 
     @Override
